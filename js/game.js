@@ -1,10 +1,14 @@
 // create a new scene
 let gameScene = new Phaser.Scene('Game');
 
+
 // innitiate scene parameters
 gameScene.init = function(){
     //player speed
-    this.playerSpeed = 5
+    this.playerSpeed = 5;
+    this.enemySpeed = 3;
+    this.enemyMinY = 80;
+    this.enemyMaxY = 280;
 }
 
 
@@ -27,10 +31,6 @@ gameScene.create = function(){
 
     //create the player
     this.player = this.add.sprite(40,this.sys.game.config.height/2, 'player');
-
-    //create the treasure
-    this.treasure = this.add.sprite(this.sys.game.config.width -80, this.sys.game.config.height/2, 'treasure');
-    this.treasure.setScale(0.5);
     
     //Change the sprite Scale
     this.player.setScale(0.5);
@@ -38,24 +38,31 @@ gameScene.create = function(){
     // this.player.scaleX= 0.5;
     // this.player.scaleY= 0.5;
 
-    //create an enemy
-    // this.enemy1 = this.add.sprite(250,180,'enemy');
-    // this.enemy1.setScale(3);
+    //create the treasure
+    this.treasure = this.add.sprite(this.sys.game.config.width -80, this.sys.game.config.height/2, 'treasure');
+    this.treasure.setScale(0.5);
+
+    // create an enemy
+    this.enemy = this.add.sprite(100, this.sys.game.config.height/2,'enemy');
+    this.enemy.flipX = true;
+    this.enemy.setScale('0.5');
+
+    // this.enemy.setScale(3);
 
     //Rotacion por el metodo de los angulos
-    // this.enemy1.angle = 45;
-    // this.enemy1.setAngle(-45);
+    // this.enemy.angle = 45;
+    // this.enemy.setAngle(-45);
 
     //Rotacion por el metodo de los grados
-    // enemy1.setOrigin(0,0);
-    // this.enemy1.rotation = Math.PI / 4;
-    // this.enemy1.setRotation(Math.PI / 4);
+    // enemy.setOrigin(0,0);
+    // this.enemy.rotation = Math.PI / 4;
+    // this.enemy.setRotation(Math.PI / 4);
 };
 
 // UPDATE
 gameScene.update = function(){
-    // this.enemy1.x += 1;
-    // this.enemy1.angle += 1;
+    // this.enemy.x += 1;
+    // this.enemy.angle += 1;
     // if(this.player.scaleX < 2){
     //     this.player.scaleX += 0.01;
     //     this.player.scaleY += 0.01;
@@ -67,6 +74,15 @@ gameScene.update = function(){
         this.player.x +=this.playerSpeed; 
     }
 
+    //Enemy movement
+    this.enemy.y += this.enemySpeed;
+
+    let conditionUp = this.enemySpeed < 0 && this.enemy.y <= this.enemyMinY;
+    let conditionDown = this.enemySpeed > 0 && this.enemy.y >= this.enemyMaxY;
+    if(conditionUp || conditionDown){
+        this.enemySpeed *=-1;
+    }
+
     //treasure overlap check
     let playerRect = this.player.getBounds();
     let treasureRect = this.treasure.getBounds();
@@ -76,6 +92,13 @@ gameScene.update = function(){
         //restart the scene
         this.scene.restart();
         return;
+    }
+
+    //enemy overlap check
+    let enemyRect = this.enemy.getBounds();
+
+    if(Phaser.Geom.Intersects.RectangleToRectangle(playerRect, enemyRect)){
+        this.scene.restart();
     }
 }
 
